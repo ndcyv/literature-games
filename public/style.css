@@ -1,0 +1,27 @@
+@font-face{font-family:Bricolage;src:url(fonts/bricolage-grotesque-latin-400-normal.woff2) format("woff2");font-weight:400}
+@font-face{font-family:Bricolage;src:url(fonts/bricolage-grotesque-latin-700-normal.woff2) format("woff2");font-weight:700}
+@font-face{font-family:Bricolage;src:url(fonts/bricolage-grotesque-latin-800-normal.woff2) format("woff2");font-weight:800}
+@font-face{font-family:Bricolage;src:url(fonts/bricolage-grotesque-latin-ext-400-normal.woff2) format("woff2");font-weight:400;unicode-range:U+0100-02AF}
+@font-face{font-family:Bricolage;src:url(fonts/bricolage-grotesque-latin-ext-700-normal.woff2) format("woff2");font-weight:700;unicode-range:U+0100-02AF}
+@font-face{font-family:Bricolage;src:url(fonts/bricolage-grotesque-latin-ext-800-normal.woff2) format("woff2");font-weight:800;unicode-range:U+0100-02AF}
+@font-face{font-family:Literata;src:url(fonts/literata-latin-400-normal.woff2) format("woff2");font-weight:400}
+@font-face{font-family:Literata;src:url(fonts/literata-latin-600-normal.woff2) format("woff2");font-weight:600}
+@font-face{font-family:Literata;src:url(fonts/literata-latin-ext-400-normal.woff2) format("woff2");font-weight:400;unicode-range:U+0100-02AF}
+@font-face{font-family:Literata;src:url(fonts/literata-latin-ext-600-normal.woff2) format("woff2");font-weight:600;unicode-range:U+0100-02AF}
+:root{--plum:#2A1740;--plum2:#3D2260;--gold:#F0B43C;--red:#E0475B;--green:#2E9E6B;--ink:#231A2E;--muted:#6E6478;--line:#E6DFEC;--wash:#F7F3FA;
+--disp:Bricolage,system-ui,sans-serif;--text:Literata,Georgia,serif}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{font-family:var(--text);color:var(--ink);background:var(--wash)}
+h1,h2,h3,.disp{font-family:var(--disp)}
+button{font-family:var(--disp);font-weight:800;border:0;border-radius:999px;padding:.8em 1.6em;font-size:1.05rem;cursor:pointer;background:var(--gold);color:var(--plum)}
+button.ghost{background:transparent;color:inherit;border:2px solid currentColor}
+button:disabled{opacity:.45;cursor:default}
+button:focus-visible,input:focus-visible{outline:3px solid var(--red);outline-offset:2px}
+input{font:inherit;font-size:1.2rem;padding:.75em .9em;border-radius:14px;border:2px solid var(--line);width:100%;background:#fff;color:var(--ink)}
+.eyebrow{font-family:var(--disp);font-weight:700;letter-spacing:.16em;text-transform:uppercase;font-size:.78rem;color:var(--gold)}
+.hidden{display:none!important}
+.stripe{height:6px;background:linear-gradient(90deg,var(--gold) 0 70%,var(--red) 70% 100%)}
+.timer{height:10px;border-radius:99px;background:rgba(255,255,255,.18);overflow:hidden}
+.timer>div{height:100%;background:var(--gold);transition:width .25s linear}
+@media (prefers-reduced-motion:reduce){.timer>div{transition:none}}

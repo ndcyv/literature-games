@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#2A1740">
+<title>The Literature Games</title>
+<link rel="stylesheet" href="style.css">
+<style>
+body{display:flex;flex-direction:column;min-height:100%}
+header{background:var(--plum);color:#fff;padding:max(14px,env(safe-area-inset-top)) 18px 14px;display:flex;justify-content:space-between;align-items:center}
+.brand{font-family:var(--disp);font-weight:800}
+.brand span{color:var(--gold)}
+.me{font-family:var(--disp);font-size:.85rem;color:#CBBEDA;text-align:right}
+.me b{color:var(--gold);font-size:1rem}
+.card{flex:1;padding:24px max(18px,env(safe-area-inset-left)) 32px;display:flex;flex-direction:column;gap:16px;max-width:560px;width:100%;margin:0 auto}
+h1{font-size:1.9rem;margin:0;color:var(--plum);line-height:1.1}
+p{margin:0;line-height:1.5}
+.muted{color:var(--muted)}
+label{font-family:var(--disp);font-weight:700;font-size:.85rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px}
+#code{text-transform:uppercase;letter-spacing:.2em;font-family:var(--disp);font-weight:800}
+.err{color:var(--red);font-family:var(--disp);font-weight:700;min-height:1.4em}
+.cat{font-family:var(--disp);font-weight:800;font-size:1.4rem;color:var(--plum)}
+.q{font-family:var(--disp);font-weight:700;font-size:1.35rem;line-height:1.4;color:var(--plum2);background:#fff;border:2px solid var(--line);border-radius:16px;padding:14px 16px;font-variant-numeric:tabular-nums;word-spacing:.15em}
+.timer{background:var(--line)}
+.big{font-family:var(--disp);font-weight:800;font-size:2.4rem;line-height:1.05}
+.ok{color:var(--green)} .no{color:var(--red)}
+.pill{display:inline-block;font-family:var(--disp);font-weight:700;background:var(--plum);color:var(--gold);border-radius:99px;padding:6px 14px}
+.qn{font-family:var(--disp);font-weight:700;color:var(--muted);font-size:.9rem}
+</style>
+</head>
+<body>
+<header><div class="brand">The <span>Literature</span> Games</div><div class="me hidden" id="me"><span id="meName"></span><br><b id="meScore">0</b> pts</div></header>
+<div class="stripe"></div>
+
+<section class="card" id="join">
+  <h1>Join the game</h1>
+  <p class="muted">Type the room code you see on the big screen, then your name.</p>
+  <div><label for="code">Room code</label><input id="code" maxlength="4" autocomplete="off" autocapitalize="characters" inputmode="text"></div>
+  <div><label for="name">Your name</label><input id="name" maxlength="24" autocomplete="name"></div>
+  <div class="err" id="joinErr"></div>
+  <button id="joinBtn">Join</button>
+</section>
+
+<section class="card hidden" id="wait">
+  <span class="pill" id="waitTitle"></span>
+  <h1 id="waitHead">You’re in!</h1>
+  <p id="waitText" class="muted">Watch the big screen. The game starts soon.</p>
+</section>
+
+<section class="card hidden" id="ask">
+  <div class="qn" id="askNum"></div>
+  <div class="timer"><div id="bar"></div></div>
+  <div class="cat" id="askCat"></div>
+  <div class="q" id="askText"></div>
+  <form id="ansForm" style="display:flex;flex-direction:column;gap:12px">
+    <label for="ans" style="margin:0">Your answer</label>
+    <input id="ans" autocomplete="off" autocapitalize="off" spellcheck="false">
+    <button id="sendBtn">Send answer</button>
+  </form>
+  <div id="sent" class="hidden"><p class="muted">Your answer:</p><p class="big" id="sentText" style="font-size:1.6rem;color:var(--plum)"></p><p class="muted" style="margin-top:10px">Waiting for the others…</p></div>
+</section>
+
+<section class="card hidden" id="result">
+  <div class="qn" id="resNum"></div>
+  <div class="big" id="resHead"></div>
+  <p id="resMine" class="muted"></p>
+  <div><label>The answer</label><div class="cat" id="resAns"></div></div>
+  <p id="resGain" class="pill" style="align-self:flex-start"></p>
+  <p class="muted" id="resRank"></p>
+</section>
+
+<section class="card hidden" id="done">
+  <span class="pill" id="doneTitle"></span>
+  <h1>Game over!</h1>
+  <div class="big" id="doneScore"></div>
+  <p id="doneRank" class="muted"></p>
+</section>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+const $ = (id) => document.getElementById(id);
+const socket = io();
+const params = new URLSearchParams(location.search);
+let saved = {}; try { saved = JSON.parse(localStorage.getItem("lg-player") || "{}"); } catch {}
+$("code").value = (params.get("room") || saved.code || "").toUpperCase();
+$("name").value = saved.name || "";
+let tick = null, lastQ = -2;
+
+function show(id) { for (const s of document.querySelectorAll(".card")) s.classList.toggle("hidden", s.id !== id); }
+function store(o) { saved = { ...saved, ...o }; try { localStorage.setItem("lg-player", JSON.stringify(saved)); } catch {} }
+
+function join(auto) {
+  const code = $("code").value.trim().toUpperCase(), name = $("name").value.trim();
+  const pid = saved.code === code ? saved.pid : null;
+  if (!auto) $("joinBtn").disabled = true;
+  socket.emit("player:join", { code, name, pid }, (r) => {
+    $("joinBtn").disabled = false;
+    if (r.error) { if (!auto) $("joinErr").textContent = r.error; show("join"); return; }
+    store({ code: r.code, pid: r.pid, name });
+  });
+}
+$("joinBtn").onclick = () => join(false);
+$("name").addEventListener("keydown", (e) => { if (e.key === "Enter") join(false); });
+socket.on("connect", () => { if (saved.pid && saved.code && saved.code === $("code").value.trim().toUpperCase()) join(true); });
+
+$("ansForm").onsubmit = (e) => {
+  e.preventDefault();
+  const text = $("ans").value.trim(); if (!text) return;
+  $("sendBtn").disabled = true;
+  socket.emit("player:answer", { text }, (r) => { $("sendBtn").disabled = false; if (r.ok) { $("ansForm").classList.add("hidden"); $("sent").classList.remove("hidden"); $("sentText").textContent = text; } });
+};
+
+socket.on("player:kicked", () => { store({ pid: null }); show("join"); $("joinErr").textContent = "You were removed from the game."; });
+socket.on("player:state", (s) => {
+  clearInterval(tick);
+  $("me").classList.remove("hidden"); $("meName").textContent = s.name; $("meScore").textContent = s.score.toLocaleString("en-GB");
+  if (s.phase === "lobby") { show("wait"); $("waitTitle").textContent = s.title; $("waitHead").textContent = `You’re in, ${s.name}!`; $("waitText").textContent = s.intro; }
+  else if (s.phase === "question") {
+    show("ask"); $("askNum").textContent = `Question ${s.qIndex + 1} of ${s.count}`;
+    $("askCat").textContent = s.question.category; $("askText").textContent = s.question.text;
+    if (lastQ !== s.qIndex) { $("ans").value = ""; lastQ = s.qIndex; }
+    const answered = !!s.myAnswer;
+    $("ansForm").classList.toggle("hidden", answered); $("sent").classList.toggle("hidden", !answered);
+    if (answered) $("sentText").textContent = s.myAnswer; else setTimeout(() => $("ans").focus(), 50);
+    const upd = () => { const left = Math.max(0, s.deadline - Date.now()); $("bar").style.width = (left / (s.timeLimit * 1000) * 100) + "%"; };
+    upd(); tick = setInterval(upd, 250);
+  } else if (s.phase === "revealed") {
+    show("result"); $("resNum").textContent = `Question ${s.qIndex + 1} of ${s.count}`;
+    $("resHead").textContent = s.correct ? "Correct!" : s.myAnswer ? "Not this time" : "No answer";
+    $("resHead").className = "big " + (s.correct ? "ok" : "no");
+    $("resMine").textContent = s.myAnswer ? `You wrote: ${s.myAnswer}` : "";
+    $("resAns").textContent = s.answer;
+    $("resGain").textContent = `+${s.gained.toLocaleString("en-GB")} points`;
+    $("resRank").textContent = `You are ${ordinal(s.rank)} of ${s.total}.`;
+  } else if (s.phase === "final") {
+    show("done"); $("doneTitle").textContent = s.title; $("doneScore").textContent = `${s.score.toLocaleString("en-GB")} points`; $("doneRank").textContent = `You finished ${ordinal(s.rank)} of ${s.total}.`;
+  }
+});
+function ordinal(n) { const s = ["th", "st", "nd", "rd"], v = n % 100; return n + (s[(v - 20) % 10] || s[v] || s[0]); }
+</script>
+</body>
+</html>
