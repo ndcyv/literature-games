@@ -48,12 +48,15 @@ label{font-family:var(--disp);font-weight:700;font-size:.8rem;letter-spacing:.08
 .role b{color:var(--gold)}
 .card{background:var(--gold);color:var(--plum);border-radius:16px;padding:16px;font-family:var(--disp);font-weight:800;font-size:1.6rem;text-align:center}
 .three{display:grid;gap:10px}
+#teacher{text-align:center;font-family:var(--disp);font-size:.85rem;color:var(--muted);padding:18px 18px max(18px,env(safe-area-inset-bottom))}
+#teacher a{color:var(--plum2);font-weight:700}
 </style>
 </head>
 <body>
 <header><div class="brand">The <span>Literature</span> Games</div><div class="me hidden" id="me"><span id="meName"></span><br><b id="meScore">0</b> pts</div></header>
 <div class="stripe"></div>
 <main id="v"></main>
+<footer id="teacher"><span>For the teacher:</span> <a href="/host">Host screen</a> · <a href="/admin">Admin</a></footer>
 <script src="/socket.io/socket.io.js"></script>
 <script>
 const socket = io();
@@ -67,7 +70,7 @@ const ord = (n) => { const s = ["th", "st", "nd", "rd"], v = n % 100; return n +
 let sig = "", tick = null, st = null, order = [];
 
 function joinScreen(msg) {
-  sig = "join";
+  sig = "join"; document.getElementById("teacher").hidden = false;
   $v.innerHTML = `<h1>Join the game</h1><p class="muted">Type the room code from the big screen, then your name.</p>
     <div><label for="code">Room code</label><input id="code" maxlength="4" autocomplete="off" autocapitalize="characters"></div>
     <div><label for="name">Your name</label><input id="name" maxlength="24" autocomplete="name"></div>
@@ -160,7 +163,7 @@ function wire(s) {
 }
 
 socket.on("player:state", (s) => {
-  st = s; clearInterval(tick);
+  st = s; document.getElementById("teacher").hidden = true; clearInterval(tick);
   document.getElementById("me").classList.remove("hidden");
   document.getElementById("meName").textContent = s.name; document.getElementById("meScore").textContent = fmt(s.score);
   const answered = s.mine ? JSON.stringify(s.mine) : "";
