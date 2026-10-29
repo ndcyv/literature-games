@@ -75,7 +75,7 @@ function joinScreen(msg) {
   document.getElementById("code").value = (params.get("room") || saved.code || "").toUpperCase();
   document.getElementById("name").value = saved.name || "";
   const go = () => join(false);
-  document.getElementById("join").onclick = go; document.getElementById("name").onkeydown = (e) => e.key === "Enter" && go();
+  document.getElementById("join").onclick = go; document.getElementById("name").onkeydown = (e) => { if (e.key === "Enter") go(); };
 }
 function join(auto) {
   const code = (auto ? saved.code : document.getElementById("code").value).trim().toUpperCase();

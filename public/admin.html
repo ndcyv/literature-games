@@ -115,7 +115,7 @@ function login(msg) {
   document.getElementById("nav").classList.add("hidden");
   $m.innerHTML = `<div class="login"><h1>Admin</h1><p class="muted">Plan your class days and edit the questions.</p><label class="lbl" for="pw">Password</label><input id="pw" type="password" autocomplete="current-password"><div class="status err">${esc(msg || "")}</div><button id="go">Sign in</button></div>`;
   const go = async () => { PW = document.getElementById("pw").value; await load(); };
-  document.getElementById("go").onclick = go; document.getElementById("pw").onkeydown = (e) => e.key === "Enter" && go(); document.getElementById("pw").focus();
+  document.getElementById("go").onclick = go; document.getElementById("pw").onkeydown = (e) => { if (e.key === "Enter") go(); }; document.getElementById("pw").focus();
 }
 async function load() {
   try { D = await api("/api/admin/data"); } catch (e) { sessionStorage.removeItem("lg-pw"); return login(e.message); }

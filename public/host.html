@@ -121,7 +121,7 @@ function picHtml(q, reveal) {
 function loginScreen(msg) {
   h(`<div class="sec">Host screen</div><h1>Welcome</h1><div class="login"><label class="lead" for="pw">Admin password</label><input id="pw" type="password" autocomplete="current-password"><div class="err">${esc(msg || "")}</div><button id="go">Continue</button></div>`);
   const go = () => { pw = document.getElementById("pw").value; listScreen(); };
-  document.getElementById("go").onclick = go; document.getElementById("pw").onkeydown = (e) => e.key === "Enter" && go();
+  document.getElementById("go").onclick = go; document.getElementById("pw").onkeydown = (e) => { if (e.key === "Enter") go(); };
   document.getElementById("pw").focus();
 }
 function listScreen() {
