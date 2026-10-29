@@ -1,27 +1,28 @@
 # The Literature Games: live quiz
 
-A small classroom quiz app. You show the **host screen** on the projector. Students join on their phones with a **room code** or by scanning the **QR code**. Answers stay hidden until everyone has answered (or time runs out), and then you reveal them.
+- **/host**: the projector screen. Pick a day plan or a single game; students join with the room code or the QR code.
+- **/**: the students' page (phones).
+- **/admin**: plan class days and edit questions, pictures and sounds.
 
-Pilot game: **Crack the Code!** (10 questions from the 2024 classes).
+The host and admin pages ask for the password set in `ADMIN_PASSWORD`.
 
-## In class
+## Settings on Render (Environment)
 
-1. Open `https://<your-app>.onrender.com/host` about a minute before class (the free plan sleeps when nobody uses it).
-2. Click **Crack the Code!**. A room code and a QR code appear.
-3. Students scan the QR code (put it on your Canva slide too), or open the site and type the code and their name.
-4. Click **Start the game** (or press Space).
-5. Each question reveals itself when everyone has answered. You can also press **Reveal now**.
-6. On the answer screen, press **Accept** under a wrong answer that should count (a typo, another spelling). Points are added straight away.
-7. Press **Next question** (or Space / →).
-8. At the end, **Download results (CSV)** gives every student's answers and points (it opens in Excel).
+| Key | Value |
+|---|---|
+| `ADMIN_PASSWORD` | a password of your choice |
+| `DATA_REPO` | `ndcyv/literature-games-data` (the private repository with the questions) |
+| `GITHUB_TOKEN` | a fine-grained GitHub token with *Contents: Read and write* on that repository only |
 
-**Scoring:** a correct answer earns 500–1,000 points; the faster the answer, the more points. A perfect game is close to 10,000, the same scale as the solo round in the course.
+Without `GITHUB_TOKEN` and `DATA_REPO` the app reads a local `data/` folder, and changes made in /admin are lost when the server restarts.
 
-**If a phone disconnects:** the student reopens the page and rejoins automatically with their score.
+## The data repository
 
-## Adding games
-
-Each game is a file in `games/`. Copy `crack-the-code.json`, change `id`, `title`, `intro`, `timeLimit` (seconds) and the questions. `accept` lists other spellings that also count.
+```
+games/<game>.json   one file per game (16 games)
+media/              pictures and sounds
+plans.json          day plans
+```
 
 ## Running it on your own computer
 
@@ -30,4 +31,4 @@ npm install
 npm start
 ```
 
-Then open http://localhost:3000/host.
+Put a copy of the data folder in `data/`, then open http://localhost:3000/host (password: `literature` unless you set `ADMIN_PASSWORD`).

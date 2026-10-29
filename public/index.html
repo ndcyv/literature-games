@@ -8,136 +8,185 @@
 <link rel="stylesheet" href="style.css">
 <style>
 body{display:flex;flex-direction:column;min-height:100%}
-header{background:var(--plum);color:#fff;padding:max(14px,env(safe-area-inset-top)) 18px 14px;display:flex;justify-content:space-between;align-items:center}
+header{background:var(--plum);color:#fff;padding:max(14px,env(safe-area-inset-top)) 18px 14px;display:flex;justify-content:space-between;align-items:center;gap:12px}
 .brand{font-family:var(--disp);font-weight:800}
 .brand span{color:var(--gold)}
 .me{font-family:var(--disp);font-size:.85rem;color:#CBBEDA;text-align:right}
 .me b{color:var(--gold);font-size:1rem}
-.card{flex:1;padding:24px max(18px,env(safe-area-inset-left)) 32px;display:flex;flex-direction:column;gap:16px;max-width:560px;width:100%;margin:0 auto}
-h1{font-size:1.9rem;margin:0;color:var(--plum);line-height:1.1}
+#v{flex:1;padding:22px max(18px,env(safe-area-inset-left)) 40px;display:flex;flex-direction:column;gap:14px;max-width:560px;width:100%;margin:0 auto}
+h1{font-size:1.8rem;margin:0;color:var(--plum);line-height:1.1}
 p{margin:0;line-height:1.5}
 .muted{color:var(--muted)}
-label{font-family:var(--disp);font-weight:700;font-size:.85rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px}
+label{font-family:var(--disp);font-weight:700;font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px}
 #code{text-transform:uppercase;letter-spacing:.2em;font-family:var(--disp);font-weight:800}
-.err{color:var(--red);font-family:var(--disp);font-weight:700;min-height:1.4em}
-.cat{font-family:var(--disp);font-weight:800;font-size:1.4rem;color:var(--plum)}
-.q{font-family:var(--disp);font-weight:700;font-size:1.35rem;line-height:1.4;color:var(--plum2);background:#fff;border:2px solid var(--line);border-radius:16px;padding:14px 16px;font-variant-numeric:tabular-nums;word-spacing:.15em}
+.err{color:var(--red);font-family:var(--disp);font-weight:700;min-height:1.2em}
+.cat{font-family:var(--disp);font-weight:800;font-size:1.35rem;color:var(--plum)}
+.box{background:#fff;border:2px solid var(--line);border-radius:16px;padding:12px 14px;line-height:1.5;white-space:pre-line}
+.box b{display:block;font-family:var(--disp);font-size:.75rem;letter-spacing:.12em;text-transform:uppercase;color:var(--red);margin-bottom:4px}
+.box img{max-width:100%;border-radius:10px;margin-top:8px;display:block}
+.box.dim{opacity:.45}
+.codebox{font-family:var(--disp);font-weight:700;font-size:1.3rem;color:var(--plum2);font-variant-numeric:tabular-nums;word-spacing:.15em}
 .timer{background:var(--line)}
-.big{font-family:var(--disp);font-weight:800;font-size:2.4rem;line-height:1.05}
+.big{font-family:var(--disp);font-weight:800;font-size:2.2rem;line-height:1.05}
 .ok{color:var(--green)} .no{color:var(--red)}
-.pill{display:inline-block;font-family:var(--disp);font-weight:700;background:var(--plum);color:var(--gold);border-radius:99px;padding:6px 14px}
+.pill{display:inline-block;font-family:var(--disp);font-weight:700;background:var(--plum);color:var(--gold);border-radius:99px;padding:6px 14px;align-self:flex-start}
 .qn{font-family:var(--disp);font-weight:700;color:var(--muted);font-size:.9rem}
+.pic{position:relative}
+.pic img{width:100%;display:block;border-radius:12px}
+.mk{position:absolute;transform:translate(-50%,-50%);width:34px;height:34px;border-radius:50%;background:var(--gold);color:var(--plum);font-family:var(--disp);font-weight:800;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 3px rgba(42,23,64,.6)}
+.choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(70px,1fr));gap:10px}
+.choices button{font-size:1.6rem;padding:.6em 0;border-radius:16px}
+.choices button.sel{background:var(--plum);color:var(--gold)}
+.ord{display:grid;gap:8px}
+.ord button{text-align:left;border-radius:14px;background:#fff;color:var(--ink);border:2px solid var(--line);font-family:var(--text);font-weight:400;font-size:1rem;padding:12px 14px;display:flex;gap:10px;align-items:center}
+.ord button .k{font-family:var(--disp);font-weight:800;min-width:1.6em;height:1.6em;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background:var(--line);color:var(--muted)}
+.ord button.picked{border-color:var(--plum)}
+.ord button.picked .k{background:var(--plum);color:var(--gold)}
+.words{display:flex;gap:8px;flex-wrap:wrap}
+.words span{font-family:var(--disp);font-weight:800;font-size:1.3rem;background:var(--gold);color:var(--plum);border-radius:10px;padding:6px 14px}
+.role{background:var(--plum);color:#fff;border-radius:16px;padding:14px 16px}
+.role b{color:var(--gold)}
+.card{background:var(--gold);color:var(--plum);border-radius:16px;padding:16px;font-family:var(--disp);font-weight:800;font-size:1.6rem;text-align:center}
+.three{display:grid;gap:10px}
 </style>
 </head>
 <body>
 <header><div class="brand">The <span>Literature</span> Games</div><div class="me hidden" id="me"><span id="meName"></span><br><b id="meScore">0</b> pts</div></header>
 <div class="stripe"></div>
-
-<section class="card" id="join">
-  <h1>Join the game</h1>
-  <p class="muted">Type the room code you see on the big screen, then your name.</p>
-  <div><label for="code">Room code</label><input id="code" maxlength="4" autocomplete="off" autocapitalize="characters" inputmode="text"></div>
-  <div><label for="name">Your name</label><input id="name" maxlength="24" autocomplete="name"></div>
-  <div class="err" id="joinErr"></div>
-  <button id="joinBtn">Join</button>
-</section>
-
-<section class="card hidden" id="wait">
-  <span class="pill" id="waitTitle"></span>
-  <h1 id="waitHead">You’re in!</h1>
-  <p id="waitText" class="muted">Watch the big screen. The game starts soon.</p>
-</section>
-
-<section class="card hidden" id="ask">
-  <div class="qn" id="askNum"></div>
-  <div class="timer"><div id="bar"></div></div>
-  <div class="cat" id="askCat"></div>
-  <div class="q" id="askText"></div>
-  <form id="ansForm" style="display:flex;flex-direction:column;gap:12px">
-    <label for="ans" style="margin:0">Your answer</label>
-    <input id="ans" autocomplete="off" autocapitalize="off" spellcheck="false">
-    <button id="sendBtn">Send answer</button>
-  </form>
-  <div id="sent" class="hidden"><p class="muted">Your answer:</p><p class="big" id="sentText" style="font-size:1.6rem;color:var(--plum)"></p><p class="muted" style="margin-top:10px">Waiting for the others…</p></div>
-</section>
-
-<section class="card hidden" id="result">
-  <div class="qn" id="resNum"></div>
-  <div class="big" id="resHead"></div>
-  <p id="resMine" class="muted"></p>
-  <div><label>The answer</label><div class="cat" id="resAns"></div></div>
-  <p id="resGain" class="pill" style="align-self:flex-start"></p>
-  <p class="muted" id="resRank"></p>
-</section>
-
-<section class="card hidden" id="done">
-  <span class="pill" id="doneTitle"></span>
-  <h1>Game over!</h1>
-  <div class="big" id="doneScore"></div>
-  <p id="doneRank" class="muted"></p>
-</section>
-
+<main id="v"></main>
 <script src="/socket.io/socket.io.js"></script>
 <script>
-const $ = (id) => document.getElementById(id);
 const socket = io();
+const $v = document.getElementById("v");
 const params = new URLSearchParams(location.search);
 let saved = {}; try { saved = JSON.parse(localStorage.getItem("lg-player") || "{}"); } catch {}
-$("code").value = (params.get("room") || saved.code || "").toUpperCase();
-$("name").value = saved.name || "";
-let tick = null, lastQ = -2;
+const store = (o) => { saved = { ...saved, ...o }; try { localStorage.setItem("lg-player", JSON.stringify(saved)); } catch {} };
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const fmt = (n) => Number(n).toLocaleString("en-GB");
+const ord = (n) => { const s = ["th", "st", "nd", "rd"], v = n % 100; return n + (s[(v - 20) % 10] || s[v] || s[0]); };
+let sig = "", tick = null, st = null, order = [];
 
-function show(id) { for (const s of document.querySelectorAll(".card")) s.classList.toggle("hidden", s.id !== id); }
-function store(o) { saved = { ...saved, ...o }; try { localStorage.setItem("lg-player", JSON.stringify(saved)); } catch {} }
-
+function joinScreen(msg) {
+  sig = "join";
+  $v.innerHTML = `<h1>Join the game</h1><p class="muted">Type the room code from the big screen, then your name.</p>
+    <div><label for="code">Room code</label><input id="code" maxlength="4" autocomplete="off" autocapitalize="characters"></div>
+    <div><label for="name">Your name</label><input id="name" maxlength="24" autocomplete="name"></div>
+    <div class="err" id="err">${esc(msg || "")}</div><button id="join">Join</button>`;
+  document.getElementById("code").value = (params.get("room") || saved.code || "").toUpperCase();
+  document.getElementById("name").value = saved.name || "";
+  const go = () => join(false);
+  document.getElementById("join").onclick = go; document.getElementById("name").onkeydown = (e) => e.key === "Enter" && go();
+}
 function join(auto) {
-  const code = $("code").value.trim().toUpperCase(), name = $("name").value.trim();
-  const pid = saved.code === code ? saved.pid : null;
-  if (!auto) $("joinBtn").disabled = true;
-  socket.emit("player:join", { code, name, pid }, (r) => {
-    $("joinBtn").disabled = false;
-    if (r.error) { if (!auto) $("joinErr").textContent = r.error; show("join"); return; }
+  const code = (auto ? saved.code : document.getElementById("code").value).trim().toUpperCase();
+  const name = auto ? saved.name : document.getElementById("name").value.trim();
+  socket.emit("player:join", { code, name, pid: saved.code === code ? saved.pid : null }, (r) => {
+    if (r.error) { if (auto) joinScreen(); else document.getElementById("err").textContent = r.error; return; }
     store({ code: r.code, pid: r.pid, name });
   });
 }
-$("joinBtn").onclick = () => join(false);
-$("name").addEventListener("keydown", (e) => { if (e.key === "Enter") join(false); });
-socket.on("connect", () => { if (saved.pid && saved.code && saved.code === $("code").value.trim().toUpperCase()) join(true); });
+socket.on("connect", () => { const want = (params.get("room") || "").toUpperCase(); if (saved.pid && saved.code && (!want || want === saved.code)) join(true); else if (sig === "") joinScreen(); });
+socket.on("player:kicked", () => { store({ pid: null }); joinScreen("You were removed from the game."); });
 
-$("ansForm").onsubmit = (e) => {
-  e.preventDefault();
-  const text = $("ans").value.trim(); if (!text) return;
-  $("sendBtn").disabled = true;
-  socket.emit("player:answer", { text }, (r) => { $("sendBtn").disabled = false; if (r.ok) { $("ansForm").classList.add("hidden"); $("sent").classList.remove("hidden"); $("sentText").textContent = text; } });
-};
+function send(payload, label) {
+  const b = document.getElementById("send"); if (b) b.disabled = true;
+  socket.emit("player:answer", payload, (r) => { if (b) b.disabled = false; const e = document.getElementById("err"); if (r.error && e) e.textContent = r.error; });
+}
 
-socket.on("player:kicked", () => { store({ pid: null }); show("join"); $("joinErr").textContent = "You were removed from the game."; });
+function questionView(s) {
+  const q = s.question, t = s.game.type, done = !!(s.mine && (s.mine.value !== undefined && s.mine.value !== null));
+  const head = `<div class="qn">${esc(s.game.title)} · Question ${s.qi + 1} of ${s.game.count}</div><div class="timer"><div id="bar"></div></div>`;
+  const waiting = (txt) => `${head}<p class="muted">Your answer:</p><p class="big" style="font-size:1.5rem;color:var(--plum)">${esc(txt)}</p><p class="muted">Waiting for the others…</p>`;
+  const input = (ph = "Your answer") => `<div><label for="a0">Your answer</label><input id="a0" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${esc(ph)}"></div><div class="err" id="err"></div><button id="send">Send answer</button>`;
+  const show = {
+    code: () => `<div class="cat">${esc(q.category)}</div><div class="box codebox">${esc(q.text)}</div>`,
+    pairs: () => "",
+    steps: () => q.steps.map((x, i) => `<div class="box"><b>${i + 1}</b>${esc(x)}</div>`).join("") + (q.total > q.steps.length ? `<div class="box dim">More clues are coming…</div>` : ""),
+    redact: () => `<div class="box">${esc(q.prompt)}</div>`,
+    posh: () => `<div class="box"><b>Posh · 2× points</b>${esc(q.posh)}${q.poshImage ? `<img src="/media/${esc(q.poshImage)}" alt="">` : ""}</div>${q.pop ? `<div class="box"><b>Pop</b>${esc(q.pop)}${q.popImage ? `<img src="/media/${esc(q.popImage)}" alt="">` : ""}</div>` : `<div class="box dim">Answer now for double points, or wait for the pop question…</div>`}`,
+    choice: () => `<p>${esc(q.prompt)}</p><div class="pic"><img src="/media/${esc(q.image)}" alt="">${q.markers.map((m) => `<span class="mk" style="left:${m.x}%;top:${m.y}%">${m.n}</span>`).join("")}</div>`,
+    order: () => `<p>${esc(q.prompt)}</p>`,
+    closest: () => `<div class="box">${esc(q.prompt)}</div>${s.partners?.length ? `<p class="muted">Your partner: <b>${esc(s.partners.join(" & "))}</b>. Don’t talk: your answers are averaged!</p>` : ""}`,
+    unique: () => `<div class="cat">${esc(q.category)}</div><p class="muted">Write a correct answer that nobody else will write.</p>`,
+  };
+  if (t === "hint") return hintView(s, head);
+  if (done) {
+    let txt = s.mine.value;
+    if (t === "pairs") txt = s.mine.value.join(" / ");
+    if (t === "order") txt = s.mine.value.map((i) => i + 1).join(" – ");
+    return waiting(txt);
+  }
+  let body = (show[t] || (() => `${q.category ? `<div class="cat">${esc(q.category)}</div>` : ""}${q.prompt ? `<div class="box">${esc(q.prompt)}</div>` : ""}${q.image ? `<img src="/media/${esc(q.image)}" alt="" style="width:100%;border-radius:12px">` : ""}${q.audio ? `<p class="muted">Listen to the big screen.</p>` : ""}`))();
+  if (t === "pairs") body = q.clues.map((c, i) => `<div><label for="a${i}">Clue ${i + 1}</label><div class="box" style="margin-bottom:8px">${esc(c)}</div><input id="a${i}" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Answer ${i + 1}"></div>`).join("") + `<div class="err" id="err"></div><button id="send">Send answers</button>`;
+  else if (t === "choice") body += `<label>Your answer</label><div class="choices">${q.markers.map((m) => m.n).sort((a, b) => a - b).map((n) => `<button data-n="${n}">${n}</button>`).join("")}</div><div class="err" id="err"></div>`;
+  else if (t === "order") body += `<p class="muted">Tap the events from the <b>earliest</b> to the <b>latest</b>. Tap again to undo.</p><div class="ord">${q.items.map((x, i) => `<button data-i="${i}"><span class="k"></span><span>${esc(x)}</span></button>`).join("")}</div><div class="err" id="err"></div><button id="send" disabled>Send order</button>`;
+  else if (t === "closest") body += `<div><label for="a0">Your guess (a number)</label><input id="a0" inputmode="decimal" autocomplete="off"></div><div class="err" id="err"></div><button id="send">Send guess</button>`;
+  else body += input(t === "spell" ? "Spell it carefully!" : undefined);
+  return head + body;
+}
+
+function hintView(s, head) {
+  const q = s.question, role = s.role;
+  if (s.stage === 0) {
+    if (role === "giver" || role === "blocker") {
+      if (s.mine?.clues) return `${head}<p class="muted">You wrote:</p><div class="words">${s.mine.clues.map((w) => `<span>${esc(w)}</span>`).join("")}</div><p class="muted">Waiting…</p>`;
+      const intro = role === "giver" ? `<div class="role">You are the <b>clue-giver</b>. Write three one-word clues so that <b>${esc(s.partner)}</b> can guess the card. Avoid obvious words: they may be blocked!</div>`
+        : `<div class="role">You are a <b>blocker</b>. Guess the three words the clue-giver will write. A match blocks their point!</div>`;
+      return `${head}${intro}<div class="cat">${esc(q.category)}</div><div class="card">${esc(s.card)}</div><div class="three">${[0, 1, 2].map((i) => `<input id="c${i}" autocomplete="off" autocapitalize="off" placeholder="Word ${i + 1}">`).join("")}</div><div class="err" id="err"></div><button id="send">Send words</button>`;
+    }
+    return `${head}<div class="role">${role === "guesser" ? `<b>${esc(s.partner)}</b> is writing three clues for <b>you</b>. Get ready!` : "The clue-giver is writing clues. You can guess too when they appear!"}</div><div class="cat">${esc(q.category)}</div>`;
+  }
+  if (role === "giver" || role === "blocker") return `${head}<div class="role">Now the others are guessing. Watch the big screen!</div>`;
+  if (s.mine?.value !== undefined && s.mine?.value !== null) return `${head}<p class="muted">Your answer:</p><p class="big" style="font-size:1.5rem;color:var(--plum)">${esc(s.mine.value)}</p><p class="muted">Waiting for the others…</p>`;
+  return `${head}<div class="cat">${esc(q.category)}</div><div class="words">${(q.clues || []).map((w) => `<span>${esc(w)}</span>`).join("")}</div>${role === "guesser" ? `<div class="role">These clues are for <b>you</b>!</div>` : `<p class="muted">Guess too, for a few bonus points.</p>`}<div><label for="a0">Your answer</label><input id="a0" autocomplete="off" autocapitalize="off" spellcheck="false"></div><div class="err" id="err"></div><button id="send">Send answer</button>`;
+}
+
+function wire(s) {
+  const t = s.game?.type;
+  const b = document.getElementById("send");
+  if (t === "hint" && document.getElementById("c0")) { b.onclick = () => send({ clues: [0, 1, 2].map((i) => document.getElementById("c" + i).value.trim()) }); return; }
+  if (t === "choice") { $v.querySelectorAll("[data-n]").forEach((x) => (x.onclick = () => { x.classList.add("sel"); send({ value: Number(x.dataset.n) }); })); return; }
+  if (!b) return;
+  if (t === "order") {
+    order = [];
+    const paint = () => { $v.querySelectorAll("[data-i]").forEach((x) => { const k = order.indexOf(Number(x.dataset.i)); x.classList.toggle("picked", k >= 0); x.querySelector(".k").textContent = k >= 0 ? k + 1 : ""; }); b.disabled = order.length !== s.question.items.length; };
+    $v.querySelectorAll("[data-i]").forEach((x) => (x.onclick = () => { const i = Number(x.dataset.i); const k = order.indexOf(i); if (k >= 0) order.splice(k, 1); else order.push(i); paint(); }));
+    b.onclick = () => send({ value: order }); paint(); return;
+  }
+  const inputs = [...$v.querySelectorAll("input")];
+  const go = () => { const vals = inputs.map((i) => i.value.trim()); if (!vals.some(Boolean)) return; send({ value: t === "pairs" ? vals : vals[0] }); };
+  b.onclick = go; inputs.forEach((i, k) => (i.onkeydown = (e) => { if (e.key === "Enter") { e.preventDefault(); if (k + 1 < inputs.length) inputs[k + 1].focus(); else go(); } }));
+  if (!inputs.some((i) => i.value)) setTimeout(() => inputs[0]?.focus(), 60);
+}
+
 socket.on("player:state", (s) => {
-  clearInterval(tick);
-  $("me").classList.remove("hidden"); $("meName").textContent = s.name; $("meScore").textContent = s.score.toLocaleString("en-GB");
-  if (s.phase === "lobby") { show("wait"); $("waitTitle").textContent = s.title; $("waitHead").textContent = `You’re in, ${s.name}!`; $("waitText").textContent = s.intro; }
+  st = s; clearInterval(tick);
+  document.getElementById("me").classList.remove("hidden");
+  document.getElementById("meName").textContent = s.name; document.getElementById("meScore").textContent = fmt(s.score);
+  const answered = s.mine ? JSON.stringify(s.mine) : "";
+  const ns = [s.phase, s.game?.title, s.qi, s.stage, s.role, answered, s.phase === "revealed" ? s.gained : ""].join("|");
+  if (ns === sig) return; sig = ns;
+  if (s.phase === "lobby") $v.innerHTML = `<span class="pill">${esc(s.title)}</span><h1>You’re in, ${esc(s.name)}!</h1><p class="muted">Watch the big screen. The game starts soon.</p>`;
+  else if (s.phase === "intro") $v.innerHTML = `<span class="pill">Next game</span><h1>${esc(s.game.title)}</h1><p>${esc(s.game.intro)}</p><p class="muted">${s.game.count} questions · ${s.game.timeLimit} seconds each</p>`;
   else if (s.phase === "question") {
-    show("ask"); $("askNum").textContent = `Question ${s.qIndex + 1} of ${s.count}`;
-    $("askCat").textContent = s.question.category; $("askText").textContent = s.question.text;
-    if (lastQ !== s.qIndex) { $("ans").value = ""; lastQ = s.qIndex; }
-    const answered = !!s.myAnswer;
-    $("ansForm").classList.toggle("hidden", answered); $("sent").classList.toggle("hidden", !answered);
-    if (answered) $("sentText").textContent = s.myAnswer; else setTimeout(() => $("ans").focus(), 50);
-    const upd = () => { const left = Math.max(0, s.deadline - Date.now()); $("bar").style.width = (left / (s.timeLimit * 1000) * 100) + "%"; };
+    const keep = {}; const focused = document.activeElement?.id;
+    $v.querySelectorAll("input").forEach((i) => (keep[i.id] = i.value));
+    $v.innerHTML = questionView(s); wire(s);
+    $v.querySelectorAll("input").forEach((i) => { if (keep[i.id]) i.value = keep[i.id]; });
+    if (focused && document.getElementById(focused)) setTimeout(() => document.getElementById(focused)?.focus(), 70);
+    const total = s.game.timeLimit * 1000, upd = () => { const b = document.getElementById("bar"); if (b) b.style.width = Math.max(0, (s.deadline - Date.now()) / total * 100) + "%"; };
     upd(); tick = setInterval(upd, 250);
   } else if (s.phase === "revealed") {
-    show("result"); $("resNum").textContent = `Question ${s.qIndex + 1} of ${s.count}`;
-    $("resHead").textContent = s.correct ? "Correct!" : s.myAnswer ? "Not this time" : "No answer";
-    $("resHead").className = "big " + (s.correct ? "ok" : "no");
-    $("resMine").textContent = s.myAnswer ? `You wrote: ${s.myAnswer}` : "";
-    $("resAns").textContent = s.answer;
-    $("resGain").textContent = `+${s.gained.toLocaleString("en-GB")} points`;
-    $("resRank").textContent = `You are ${ordinal(s.rank)} of ${s.total}.`;
-  } else if (s.phase === "final") {
-    show("done"); $("doneTitle").textContent = s.title; $("doneScore").textContent = `${s.score.toLocaleString("en-GB")} points`; $("doneRank").textContent = `You finished ${ordinal(s.rank)} of ${s.total}.`;
-  }
+    const mine = s.mine ? (s.game.type === "pairs" ? s.mine.value.join(" / ") : s.game.type === "order" ? s.mine.value.map((i) => i + 1).join(" – ") : s.mine.value ?? (s.mine.clues || []).join(", ")) : "";
+    $v.innerHTML = `<div class="qn">${esc(s.game.title)} · Question ${s.qi + 1} of ${s.game.count}</div>
+      <div class="big ${s.correct ? "ok" : "no"}">${s.correct ? "Correct!" : s.mine ? "Not this time" : "No answer"}</div>
+      ${mine !== "" && mine != null ? `<p class="muted">You wrote: ${esc(mine)}</p>` : ""}
+      ${s.note ? `<p><b>${esc(s.note)}</b></p>` : ""}
+      <div><label>The answer</label><div class="cat">${esc(s.answer)}</div></div>
+      <span class="pill">+${fmt(s.gained)} points</span><p class="muted">You are ${ord(s.rank)} of ${s.total}.</p>`;
+  } else if (s.phase === "gameover") $v.innerHTML = `<span class="pill">${esc(s.game.title)}</span><h1>End of the game</h1><p class="big">${fmt(s.gameScore)} points</p><p class="muted">In total you have ${fmt(s.score)} points and you are ${ord(s.rank)} of ${s.total}.</p>`;
+  else if (s.phase === "final") $v.innerHTML = `<span class="pill">${esc(s.title)}</span><h1>Game over!</h1><p class="big">${fmt(s.score)} points</p><p class="muted">You finished ${ord(s.rank)} of ${s.total}.</p>`;
 });
-function ordinal(n) { const s = ["th", "st", "nd", "rd"], v = n % 100; return n + (s[(v - 20) % 10] || s[v] || s[0]); }
 </script>
 </body>
 </html>
