@@ -60,6 +60,7 @@ label{font-family:var(--disp);font-weight:700;font-size:.8rem;letter-spacing:.08
 <script src="/socket.io/socket.io.js"></script>
 <script>
 const socket = io();
+setInterval(() => fetch("/healthz", { cache: "no-store" }).catch(() => {}), 4 * 60e3);
 const $v = document.getElementById("v");
 const params = new URLSearchParams(location.search);
 let saved = {}; try { saved = JSON.parse(localStorage.getItem("lg-player") || "{}"); } catch {}
@@ -84,7 +85,7 @@ function join(auto) {
   const code = (auto ? saved.code : document.getElementById("code").value).trim().toUpperCase();
   const name = auto ? saved.name : document.getElementById("name").value.trim();
   socket.emit("player:join", { code, name, pid: saved.code === code ? saved.pid : null }, (r) => {
-    if (r.error) { if (auto) joinScreen(); else document.getElementById("err").textContent = r.error; return; }
+    if (r.error) { if (auto) { store({ pid: null }); joinScreen("The game was restarted. Type the new room code from the big screen."); } else document.getElementById("err").textContent = r.error; return; }
     store({ code: r.code, pid: r.pid, name });
   });
 }

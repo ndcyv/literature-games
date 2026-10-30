@@ -103,6 +103,8 @@ tr.win td{background:var(--green)}
 <script src="/socket.io/socket.io.js"></script>
 <script>
 const socket = io();
+// Backup keep-alive while this screen is open (see /healthz in server.js).
+setInterval(() => fetch("/healthz", { cache: "no-store" }).catch(() => {}), 4 * 60e3);
 const $v = document.getElementById("v");
 const ss = { get: (k) => { try { return sessionStorage.getItem(k); } catch { return null; } }, set: (k, v) => { try { sessionStorage.setItem(k, v); } catch {} }, del: (k) => { try { sessionStorage.removeItem(k); } catch {} } };
 let pw = ss.get("lg-pw") || "", hostKey = ss.get("lg-hostkey") || newKey(), st = null, tick = null, sig = "";
@@ -144,7 +146,11 @@ function alertBox(msg) { const d = document.createElement("div"); d.className = 
 
 socket.on("connect", () => {
   if (!pw) return loginScreen();
-  socket.emit("host:create", { password: pw, hostKey }, (r) => { if (r.error) loginScreen(r.error); else if (r.none) listScreen(); });
+  const hadRoom = !!(st && st.code && st.phase !== "final");
+  socket.emit("host:create", { password: pw, hostKey }, (r) => {
+    if (r.error) loginScreen(r.error);
+    else if (r.none) { listScreen(); if (hadRoom) setTimeout(() => alertBox("The server restarted, so the last game was lost. Please start the game again; students will need the new room code."), 300); }
+  });
 });
 
 // ---------- room screens ----------
