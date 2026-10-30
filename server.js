@@ -239,6 +239,7 @@ io.on("connection", (socket) => {
     const qr = await QRCode.toDataURL(joinUrl, { margin: 1, width: 600, color: { dark: "#2A1740", light: "#FFFFFF" } });
     const title = planId ? PLANS.find((p) => p.id === planId).name : items[0].game.title;
     const r = { code, hostKey, hostSocket: socket.id, title, items, gi: -1, qi: -1, phase: "lobby", stage: 0, players: new Map(), ans: {}, res: {}, accepted: {}, pairs: {}, roles: {}, rot: {}, joinUrl, qr, created: Date.now(), active: Date.now() };
+    for (const old of rooms.values()) if (old.hostSocket === socket.id) old.hostSocket = null; // detach from any earlier room
     rooms.set(code, r); socket.data = { room: code, host: true };
     cb?.({ code }); broadcast(r);
   });
@@ -252,6 +253,8 @@ io.on("connection", (socket) => {
     String(gkey).split("|").forEach((w, i) => { if (w && w !== "(blank)") (acc[i] ??= new Set()).add(w); });
     rescore(r); broadcast(r);
   });
+  // The host left a finished game: stop sending that room's updates to this screen.
+  socket.on("host:leave", () => { const r = hostRoom(); if (r && r.hostSocket === socket.id) r.hostSocket = null; socket.data = {}; });
   socket.on("host:end", () => { const r = hostRoom(); if (!r) return; clearTimeout(r.timer); clearTimeout(r.stageTimer); r.phase = "final"; broadcast(r); });
   socket.on("host:kick", ({ id }) => { const r = hostRoom(); if (!r) return; const p = r.players.get(id); if (p?.socket) io.to(p.socket).emit("player:kicked"); r.players.delete(id); broadcast(r); });
 
