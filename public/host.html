@@ -107,6 +107,7 @@ const socket = io();
 setInterval(() => fetch("/healthz", { cache: "no-store" }).catch(() => {}), 4 * 60e3);
 const $v = document.getElementById("v");
 const ss = { get: (k) => { try { return sessionStorage.getItem(k); } catch { return null; } }, set: (k, v) => { try { sessionStorage.setItem(k, v); } catch {} }, del: (k) => { try { sessionStorage.removeItem(k); } catch {} } };
+let myCode = null; // the room this screen is showing; states from any other room are ignored
 let pw = ss.get("lg-pw") || "", hostKey = ss.get("lg-hostkey") || newKey(), st = null, tick = null, sig = "";
 function newKey() { const k = crypto.randomUUID(); ss.set("lg-hostkey", k); return k; }
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
@@ -140,7 +141,7 @@ function listScreen() {
   });
 }
 function create(what) {
-  socket.emit("host:create", { password: pw, hostKey, ...what }, (r) => { if (r.error) alertBox(r.error); });
+  socket.emit("host:create", { password: pw, hostKey, ...what }, (r) => { if (r.error) alertBox(r.error); else if (r.code) myCode = r.code; });
 }
 function alertBox(msg) { const d = document.createElement("div"); d.className = "err"; d.textContent = msg; $v.prepend(d); }
 
@@ -149,12 +150,14 @@ socket.on("connect", () => {
   const hadRoom = !!(st && st.code && st.phase !== "final");
   socket.emit("host:create", { password: pw, hostKey }, (r) => {
     if (r.error) loginScreen(r.error);
+    else if (r.code) myCode = r.code;
     else if (r.none) { listScreen(); if (hadRoom) setTimeout(() => alertBox("The server restarted, so the last game was lost. Please start the game again; students will need the new room code."), 300); }
   });
 });
 
 // ---------- room screens ----------
 socket.on("host:state", (s) => {
+  if (!myCode || s.code !== myCode) return; // e.g. a late update from the game that just finished
   st = s; clearInterval(tick);
   document.getElementById("chip").classList.toggle("hidden", s.phase === "lobby"); document.getElementById("chipCode").textContent = s.code;
   const ns = [s.phase, s.gi, s.qi, s.stage].join("|");
@@ -177,7 +180,7 @@ function lobby(s) {
     </div>
     <div><div class="qr"><img src="${s.qr}" alt="QR code to join"></div><div class="url">${esc(s.joinUrl)}</div></div></div>`);
   document.getElementById("go").onclick = () => socket.emit("host:next");
-  document.getElementById("leave").onclick = () => { socket.emit("host:end"); hostKey = newKey(); sig = ""; listScreen(); };
+  document.getElementById("leave").onclick = () => { socket.emit("host:end"); hostKey = newKey(); sig = ""; myCode = null; st = null; listScreen(); };
 }
 function intro(s) {
   h(`<div class="sec" style="margin-top:0">Game ${s.gi + 1} of ${s.games.length}</div>
@@ -256,7 +259,7 @@ function final(s) {
   h(`<div class="sec" style="margin-top:0">Final scores</div><h1 style="margin:1vh 0 3vh">${esc(s.title)}</h1>${boardHtml(s.leaderboard, 10, "big")}
     <div class="row" style="margin-top:3vh"><button id="csv">Download results (CSV)</button><button class="ghost" id="again">Play something else</button></div>`);
   document.getElementById("csv").onclick = () => { location.href = `/api/rooms/${st.code}/results.csv?key=${encodeURIComponent(hostKey)}`; };
-  document.getElementById("again").onclick = () => { hostKey = newKey(); sig = ""; document.getElementById("chip").classList.add("hidden"); listScreen(); };
+  document.getElementById("again").onclick = () => { socket.emit("host:leave"); hostKey = newKey(); sig = ""; myCode = null; st = null; document.getElementById("chip").classList.add("hidden"); listScreen(); };
 }
 document.addEventListener("keydown", (e) => {
   if (!st || e.target.tagName === "INPUT" || (e.key !== " " && e.key !== "ArrowRight")) return;
