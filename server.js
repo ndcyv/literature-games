@@ -222,6 +222,7 @@ function broadcast(r) {
 
 // ---------- sockets ----------
 io.on("connection", (socket) => {
+  socket.onAny(() => { const r = rooms.get(socket.data?.room); if (r) r.active = Date.now(); });
   socket.on("host:list", ({ password }, cb) => {
     if (password !== PASSWORD) return cb?.({ error: "Wrong password" });
     cb?.({ plans: PLANS.map((p) => ({ id: p.id, name: p.name, games: (p.games || []).map((e) => GAMES[e.game]?.title).filter(Boolean) })),
@@ -237,7 +238,7 @@ io.on("connection", (socket) => {
     const joinUrl = `${base.replace(/\/$/, "")}/?room=${code}`;
     const qr = await QRCode.toDataURL(joinUrl, { margin: 1, width: 600, color: { dark: "#2A1740", light: "#FFFFFF" } });
     const title = planId ? PLANS.find((p) => p.id === planId).name : items[0].game.title;
-    const r = { code, hostKey, hostSocket: socket.id, title, items, gi: -1, qi: -1, phase: "lobby", stage: 0, players: new Map(), ans: {}, res: {}, accepted: {}, pairs: {}, roles: {}, rot: {}, joinUrl, qr, created: Date.now() };
+    const r = { code, hostKey, hostSocket: socket.id, title, items, gi: -1, qi: -1, phase: "lobby", stage: 0, players: new Map(), ans: {}, res: {}, accepted: {}, pairs: {}, roles: {}, rot: {}, joinUrl, qr, created: Date.now(), active: Date.now() };
     rooms.set(code, r); socket.data = { room: code, host: true };
     cb?.({ code }); broadcast(r);
   });
@@ -349,6 +350,16 @@ app.get("/api/rooms/:code/results.csv", (req, res) => {
 for (const page of ["host", "admin"]) app.get(`/${page}`, (_req, res) => res.sendFile(path.join(__dirname, "public", `${page}.html`)));
 app.use(express.static(path.join(__dirname, "public")));
 
+// Keep-alive: Render's free plan stops the server after 15 minutes without new HTTP requests,
+// and a game played over websockets does not count. While a game is in progress, ping our own
+// public address every 4 minutes so the server is not stopped in the middle of play.
+app.get("/healthz", (_req, res) => res.set("Cache-Control", "no-store").send("ok"));
+const SELF_URL = (process.env.RENDER_EXTERNAL_URL || process.env.PUBLIC_URL || "").replace(/\/$/, "");
+setInterval(() => {
+  if (!SELF_URL) return;
+  const busy = [...rooms.values()].some((r) => r.phase !== "final" && Date.now() - (r.active || r.created) < 30 * 60e3);
+  if (busy) fetch(`${SELF_URL}/healthz`).catch(() => {});
+}, 4 * 60e3);
 setInterval(() => { const cut = Date.now() - 8 * 3600e3; for (const [c, r] of rooms) if (r.created < cut) rooms.delete(c); }, 600e3);
 loadData().then(() => server.listen(PORT, () => console.log(`The Literature Games on http://localhost:${PORT}  (host: /host, admin: /admin)`)))
   .catch((e) => { console.error("Could not load data:", e.message); process.exit(1); });
